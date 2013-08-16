@@ -77,6 +77,11 @@ PRODUCT_COPY_FILES += \
     vendor/ose/prebuilt/common/etc/init.d/00banner:system/etc/init.d/00banner \
     vendor/ose/prebuilt/common/bin/sysinit:system/bin/sysinit
 
+# Added xbin files
+PRODUCT_COPY_FILES += \
+    vendor/ose/prebuilt/common/xbin/zip:system/xbin/zip \
+    vendor/ose/prebuilt/common/xbin/zipalign:system/xbin/zipalign
+
 # userinit support
 PRODUCT_COPY_FILES += \
     vendor/ose/prebuilt/common/etc/init.d/90userinit:system/etc/init.d/90userinit
@@ -101,6 +106,37 @@ PRODUCT_COPY_FILES += \
 # This is OSE!
 PRODUCT_COPY_FILES += \
     vendor/ose/config/permissions/com.ose.android.xml:system/etc/permissions/com.ose.android.xml
+
+#Init.D
+PRODUCT_COPY_FILES += \
+    vendor/ose/prebuilt/common/etc/init.d/00banner:system/etc/init.d/00banner \
+    vendor/ose/prebuilt/common/etc/init.d/90userinit:system/etc/init.d/90userinit \
+    vendor/ose/prebuilt/common/etc/init.d/00check:system/etc/init.d/00check \
+    vendor/ose/prebuilt/common/etc/init.d/01zipalign:system/etc/init.d/01zipalign \
+    vendor/ose/prebuilt/common/etc/init.d/02sysctl:system/etc/init.d/02sysctl \
+    vendor/ose/prebuilt/common/etc/init.d/03firstboot:system/etc/init.d/03firstboot \
+    vendor/ose/prebuilt/common/etc/init.d/05freemem:system/etc/init.d/05freemem \
+    vendor/ose/prebuilt/common/etc/init.d/06removecache:system/etc/init.d/06removecache \
+    vendor/ose/prebuilt/common/etc/init.d/07fixperms:system/etc/init.d/07fixperms \
+    vendor/ose/prebuilt/common/etc/init.d/09cron:system/etc/init.d/09cron \
+    vendor/ose/prebuilt/common/etc/init.d/10sdboost:system/etc/init.d/10sdboost \
+    vendor/ose/prebuilt/common/etc/init.d/11battery:system/etc/init.d/11battery \
+    vendor/ose/prebuilt/common/etc/init.d/12touch:system/etc/init.d/12touch \
+    vendor/ose/prebuilt/common/etc/init.d/13minfree:system/etc/init.d/13minfree \
+    vendor/ose/prebuilt/common/etc/init.d/14gpurender:system/etc/init.d/14gpurender \
+    vendor/ose/prebuilt/common/etc/init.d/15sleepers:system/etc/init.d/15sleepers \
+    vendor/ose/prebuilt/common/etc/init.d/16journalism:system/etc/init.d/16journalism \
+    vendor/ose/prebuilt/common/etc/init.d/17sqlite3:system/etc/init.d/17sqlite3 \
+    vendor/ose/prebuilt/common/etc/init.d/18wifisleep:system/etc/init.d/18wifisleep \
+    vendor/ose/prebuilt/common/etc/init.d/19iostats:system/etc/init.d/19iostats \
+    vendor/ose/prebuilt/common/etc/init.d/20setrenice:system/etc/init.d/20setrenice \
+    vendor/ose/prebuilt/common/etc/init.d/21tweaks:system/etc/init.d/21tweaks \
+    vendor/ose/prebuilt/common/etc/init.d/24speedy_modified:system/etc/init.d/24speedy_modified \
+    vendor/ose/prebuilt/common/etc/init.d/25loopy_smoothness_tweak:system/etc/init.d/25loopy_smoothness_tweak \
+    vendor/ose/prebuilt/common/etc/init.d/98tweaks:system/etc/init.d/98tweaks \
+    vendor/ose/prebuilt/common/etc/helpers.sh:system/etc/helpers.sh \
+    vendor/ose/prebuilt/common/etc/init.d.cfg:system/etc/init.d.cfg \
+    vendor/ose/prebuilt/common/bin/sysinit:system/bin/sysinit
 
 # T-Mobile theme engine
 include vendor/ose/config/themes_common.mk
