@@ -222,6 +222,11 @@ endif
 # Set all versions
 OSE_VERSION := OSE-$(OSE_BUILD)-$(PLATFORM_VERSION)-$(OSE_BUILD_TYPE)-$(shell date +"%m%d%Y-%H%M")
 
+# HFM Files
+PRODUCT_COPY_FILES += \
+    vendor/ose/prebuilt/etc/hosts.alt:system/etc/hosts.alt \
+    vendor/ose/prebuilt/etc/hosts.og:system/etc/hosts.og
+
 PRODUCT_PROPERTY_OVERRIDES += \
     BUILD_DISPLAY_ID=$(BUILD_ID) \
     ro.ose.version=$(OSE_VERSION) \
