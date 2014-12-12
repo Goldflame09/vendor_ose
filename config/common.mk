@@ -57,15 +57,15 @@ PRODUCT_PROPERTY_OVERRIDES += persist.sys.dun.override=0
 # Backup Tool
 ifneq ($(WITH_GMS),true)
 PRODUCT_COPY_FILES += \
-    vendor/ose/prebuilt/common/bin/backuptool.sh:system/bin/backuptool.sh \
-    vendor/ose/prebuilt/common/bin/backuptool.functions:system/bin/backuptool.functions \
+    vendor/ose/prebuilt/common/bin/backuptool.sh:install/bin/backuptool.sh \
+    vendor/ose/prebuilt/common/bin/backuptool.functions:install/bin/backuptool.functions \
     vendor/ose/prebuilt/common/bin/50-ose.sh:system/addon.d/50-ose.sh \
     vendor/ose/prebuilt/common/bin/blacklist:system/addon.d/blacklist
 endif
 
 # Signature compatibility validation
 PRODUCT_COPY_FILES += \
-    vendor/ose/prebuilt/common/bin/otasigcheck.sh:system/bin/otasigcheck.sh
+    vendor/ose/prebuilt/common/bin/otasigcheck.sh:install/bin/otasigcheck.sh
 
 # init.d support
 PRODUCT_COPY_FILES += \
