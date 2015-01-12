@@ -1,16 +1,16 @@
-# Inherit common CM stuff
-$(call inherit-product, vendor/cm/config/common.mk)
+# Inherit common OSE stuff
+$(call inherit-product, vendor/ose/config/common.mk)
 
 # Bring in all video files
 $(call inherit-product, frameworks/base/data/videos/VideoPackage2.mk)
 
-# Include CM audio files
-include vendor/cm/config/cm_audio.mk
+# Include OSE audio files
+include vendor/ose/config/ose_audio.mk
 
-# Include CM LatinIME dictionaries
-PRODUCT_PACKAGE_OVERLAYS += vendor/cm/overlay/dictionaries
+# Include OSE LatinIME dictionaries
+PRODUCT_PACKAGE_OVERLAYS += vendor/ose/overlay/dictionaries
 
-# Optional CM packages
+# Optional OSE packages
 PRODUCT_PACKAGES += \
     Galaxy4 \
     HoloSpiralWallpaper \
@@ -32,7 +32,7 @@ PRODUCT_PACKAGES += \
     libvideoeditor_videofilters \
     libvideoeditorplayer
 
-# Extra tools in CM
+# Extra tools in OSE
 PRODUCT_PACKAGES += \
     vim \
     zip \
