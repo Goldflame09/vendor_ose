@@ -1,49 +1,5 @@
 PRODUCT_BRAND ?= ose
 
-SUPERUSER_EMBEDDED := true
-SUPERUSER_PACKAGE_PREFIX := com.android.settings.ose.superuser
-
-ifneq ($(TARGET_SCREEN_WIDTH) $(TARGET_SCREEN_HEIGHT),$(space))
-# determine the smaller dimension
-TARGET_BOOTANIMATION_SIZE := $(shell \
-  if [ $(TARGET_SCREEN_WIDTH) -lt $(TARGET_SCREEN_HEIGHT) ]; then \
-    echo $(TARGET_SCREEN_WIDTH); \
-  else \
-    echo $(TARGET_SCREEN_HEIGHT); \
-  fi )
-
-# get a sorted list of the sizes
-bootanimation_sizes := $(subst .zip,, $(shell ls vendor/ose/prebuilt/common/bootanimation))
-bootanimation_sizes := $(shell echo -e $(subst $(space),'\n',$(bootanimation_sizes)) | sort -rn)
-
-# find the appropriate size and set
-define check_and_set_bootanimation
-$(eval TARGET_BOOTANIMATION_NAME := $(shell \
-  if [ -z "$(TARGET_BOOTANIMATION_NAME)" ]; then
-    if [ $(1) -le $(TARGET_BOOTANIMATION_SIZE) ]; then \
-      echo $(1); \
-      exit 0; \
-    fi;
-  fi;
-  echo $(TARGET_BOOTANIMATION_NAME); ))
-endef
-$(foreach size,$(bootanimation_sizes), $(call check_and_set_bootanimation,$(size)))
-
-ifeq ($(TARGET_BOOTANIMATION_HALF_RES),true)
-PRODUCT_BOOTANIMATION := vendor/ose/prebuilt/common/bootanimation/halfres/$(TARGET_BOOTANIMATION_NAME).zip
-else
-PRODUCT_BOOTANIMATION := vendor/ose/prebuilt/common/bootanimation/$(TARGET_BOOTANIMATION_NAME).zip
-endif
-endif
-
-ifdef OSE_NIGHTLY
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.rommanager.developerid=osenightly
-else
-PRODUCT_PROPERTY_OVERRIDES += \
-    ro.rommanager.developerid=ose
-endif
-
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
 
 ifeq ($(PRODUCT_GMS_CLIENTID_BASE),)
@@ -66,13 +22,37 @@ PRODUCT_PROPERTY_OVERRIDES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.build.selinux=1
 
+# Enable Root and ADB authentication
+ADDITIONAL_DEFAULT_PROPERTIES += \
+    ro.secure=0 \
+    ro.adb.secure=0 \
+    persist.sys.root_access=3
+
+# OSE Tweaks
+PRODUCT_PROPERTY_OVERRIDES += \
+    pm.sleep.mode=1 \
+    wifi.supplicant_scan_interval=180 \
+    windowsmgr.max_events_per_sec=150 \
+    debug.performance.tuning=1 \
+    ro.ril.power_collapse=1 \
+    persist.service.lgospd.enable=0 \
+    persist.service.pcsync.enable=0 \
+    ro.facelock.black_timeout=400 \
+    ro.facelock.det_timeout=1500 \
+    ro.facelock.rec_timeout=2500 \
+    ro.facelock.lively_timeout=2500 \
+    ro.facelock.est_max_time=600 \
+    ro.facelock.use_intro_anim=false \
+    dalvik.vm.dex2oat-flags "--compiler-filter=interpret-only" \
+    dalvik.vm.profiler=1 \
+    dalvik.vm.isa.arm.features=lpae,div
+
+# Disable excessive dalvik debug messages
+PRODUCT_PROPERTY_OVERRIDES += \
+    dalvik.vm.debug.alloc=0
+
 # Thank you, please drive thru!
 PRODUCT_PROPERTY_OVERRIDES += persist.sys.dun.override=0
-
-ifneq ($(TARGET_BUILD_VARIANT),eng)
-# Enable ADB authentication
-ADDITIONAL_DEFAULT_PROPERTIES += ro.adb.secure=1
-endif
 
 # Backup Tool
 ifneq ($(WITH_GMS),true)
@@ -120,6 +100,10 @@ PRODUCT_COPY_FILES += \
 # T-Mobile theme engine
 include vendor/ose/config/themes_common.mk
 
+# Embed SuperUser
+SUPERUSER_EMBEDDED := true
+SUPERUSER_PACKAGE_PREFIX := com.android.settings.ose.superuser
+
 # Required OSE packages
 PRODUCT_PACKAGES += \
     Development \
@@ -138,13 +122,8 @@ PRODUCT_PACKAGES += \
     Launcher3 \
     Trebuchet \
     AudioFX \
-    oseWallpapers \
-    oseFileManager \
     Eleven \
-    LockClock \
-    oseUpdater \
-    oseAccount \
-    oseHome
+    LockClock
 
 # OSE Hardware Abstraction Framework
 PRODUCT_PACKAGES += \
@@ -174,8 +153,11 @@ PRODUCT_PACKAGES += \
     gdbserver \
     micro_bench \
     oprofiled \
+    procmem \
+    procrank \
     sqlite3 \
-    strace
+    strace \
+    su
 
 # Openssh
 PRODUCT_PACKAGES += \
@@ -198,25 +180,45 @@ PRODUCT_PACKAGES += \
     libFFmpegExtractor \
     libnamparser
 
-# These packages are excluded from user builds
-ifneq ($(TARGET_BUILD_VARIANT),user)
-PRODUCT_PACKAGES += \
-    procmem \
-    procrank \
-    su
-endif
-
-PRODUCT_PROPERTY_OVERRIDES += \
-    persist.sys.root_access=0
-
 PRODUCT_PACKAGE_OVERLAYS += vendor/ose/overlay/common
+
+# Boot animation include
+ifneq ($(TARGET_SCREEN_WIDTH) $(TARGET_SCREEN_HEIGHT),$(space))
+
+# determine the smaller dimension
+TARGET_BOOTANIMATION_SIZE := $(shell \
+  if [ $(TARGET_SCREEN_WIDTH) -lt $(TARGET_SCREEN_HEIGHT) ]; then \
+    echo $(TARGET_SCREEN_WIDTH); \
+  else \
+    echo $(TARGET_SCREEN_HEIGHT); \
+  fi )
+
+# get a sorted list of the sizes
+bootanimation_sizes := $(subst .zip,, $(shell ls vendor/ose/prebuilt/common/bootanimation))
+bootanimation_sizes := $(shell echo -e $(subst $(space),'\n',$(bootanimation_sizes)) | sort -rn)
+
+# find the appropriate size and set
+define check_and_set_bootanimation
+$(eval TARGET_BOOTANIMATION_NAME := $(shell \
+  if [ -z "$(TARGET_BOOTANIMATION_NAME)" ]; then
+    if [ $(1) -le $(TARGET_BOOTANIMATION_SIZE) ]; then \
+      echo $(1); \
+      exit 0; \
+    fi;
+  fi;
+  echo $(TARGET_BOOTANIMATION_NAME); ))
+endef
+$(foreach size,$(bootanimation_sizes), $(call check_and_set_bootanimation,$(size)))
+
+PRODUCT_COPY_FILES += \
+    vendor/ose/prebuilt/common/bootanimation/$(TARGET_BOOTANIMATION_NAME).zip:system/media/bootanimation.zip
+endif
 
 PRODUCT_VERSION_MAJOR = 5.0
 PRODUCT_VERSION_MINOR = 2
 PRODUCT_VERSION_MAINTENANCE = 0-RC0
 
-# Set ose_BUILDTYPE from the env RELEASE_TYPE, for jenkins compat
-
+# OSE Versioning System
 ifndef OSE_BUILDTYPE
     ifdef RELEASE_TYPE
         # Starting with "ose_" is optional
@@ -284,8 +286,7 @@ endif
 PRODUCT_PROPERTY_OVERRIDES += \
   ro.ose.version=$(OSE_VERSION) \
   ro.ose.releasetype=$(OSE_BUILDTYPE) \
-  ro.modversion=$(OSE_VERSION) \
-  ro.oselegal.url=https://www.ose.org/docs/privacy
+  ro.modversion=$(OSE_VERSION)
 
 -include vendor/ose-priv/keys/keys.mk
 

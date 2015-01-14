@@ -12,16 +12,9 @@ PRODUCT_PACKAGE_OVERLAYS += vendor/ose/overlay/dictionaries
 
 # Optional OSE packages
 PRODUCT_PACKAGES += \
-    Galaxy4 \
-    HoloSpiralWallpaper \
-    LiveWallpapers \
     LiveWallpapersPicker \
-    MagicSmokeWallpapers \
-    NoiseField \
     PhaseBeam \
-    VisualizationWallpapers \
     PhotoTable \
-    SoundRecorder \
     PhotoPhase
 
 PRODUCT_PACKAGES += \
