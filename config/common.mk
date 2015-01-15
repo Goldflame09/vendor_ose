@@ -100,10 +100,6 @@ PRODUCT_COPY_FILES += \
 # T-Mobile theme engine
 include vendor/ose/config/themes_common.mk
 
-# Embed SuperUser
-SUPERUSER_EMBEDDED := true
-SUPERUSER_PACKAGE_PREFIX := com.android.settings.ose.superuser
-
 # Required OSE packages
 PRODUCT_PACKAGES += \
     Development \
