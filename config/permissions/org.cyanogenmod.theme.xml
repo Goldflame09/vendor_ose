@@ -21,8 +21,8 @@
      -->
 
     <!-- This is an alias for org.ose.theme.v1 -->
-    <feature name="org.ose.theme" />
+    <feature name="org.cyanogenmod.theme" />
 
     <!-- Supports themes using v1 of the theme engine -->
-    <feature name="org.ose.theme.v1" />
+    <feature name="org.cyanogenmod.theme.v1" />
 </permissions>
