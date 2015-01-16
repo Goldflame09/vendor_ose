@@ -115,7 +115,6 @@ PRODUCT_PACKAGES += \
 
 # Custom OSE packages
 PRODUCT_PACKAGES += \
-    Launcher3 \
     Trebuchet \
     AudioFX \
     Eleven \
