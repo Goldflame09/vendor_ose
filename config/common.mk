@@ -113,7 +113,6 @@ PRODUCT_PACKAGES += \
 
 # Optional OSE packages
 PRODUCT_PACKAGES += \
-    VoicePlus \
     Basic \
     libemoji \
     Terminal
