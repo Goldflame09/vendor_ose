@@ -7,19 +7,22 @@ usage()
     echo -e "  build-ose.sh [options] device"
     echo -e ""
     echo -e ${txtbld}"  Options:"${txtrst}
-    echo -e "    -c# Cleanin options before build:"
+    echo -e "    -a  Builds official OSE:"
+    echo -e "    -b  Compiles Non-Block zip:"
+    echo -e "    -c# Cleaning options:"
     echo -e "        1 - make clean"
     echo -e "        2 - make dirty"
     echo -e "        3 - make magicbrownies"
-    echo -e "    -d  Use dex optimizations"
-    echo -e "    -f Build with prebuilt chromium"
-    echo -e "    -j# Set jobs"
-    echo -e "    -r  Reset source tree before build"
-    echo -e "    -s  Sync before build"
-    echo -e "    -p  Build using pipe"
-    echo -e "    -o# Select GCC O Level"
+    echo -e "    -d  Uses dex optimizations"
+    echo -e "    -e  Uses OSE optimizations"
+    echo -e "    -f  Builds with prebuilt chromium"
+    echo -e "    -j# Sets jobs"
+    echo -e "    -o# Selects GCC O Level"
     echo -e "        Valid O Levels are"
     echo -e "        1 (Os) or 3 (O3)"
+    echo -e "    -p  Builds using pipe"
+    echo -e "    -r  Resets source tree before build"
+    echo -e "    -s  Syncs before build"
     echo -e "    -v  Verbose build output"
     echo -e ""
     echo -e ${txtbld}"  Example:"${txtrst}
@@ -28,7 +31,7 @@ usage()
     exit 1
 }
 
-# colors
+# Colors
 . ./vendor/ose/tools/colors
 
 if [ ! -d ".repo" ]; then
@@ -40,7 +43,7 @@ if [ ! -d "vendor/ose" ]; then
     exit 1
 fi
 
-# figure out the output directories
+# Find the output directories
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 thisDIR="${PWD##*/}"
 
@@ -55,22 +58,11 @@ RES="$?"
 
 if [ $RES = 1 ];then
     export OUTDIR=$OUT_DIR_COMMON_BASE/$thisDIR
-    echo -e ""
-    echo -e ${cya}"External out DIR is set ($OUTDIR)"${txtrst}
-    echo -e ""
 elif [ $RES = 0 ];then
     export OUTDIR=$DIR/out
-    echo -e ""
-    echo -e ${cya}"No external out, using default ($OUTDIR)"${txtrst}
-    echo -e ""
-else
-    echo -e ""
-    echo -e ${red}"NULL"${txtrst}
-    echo -e ${red}"Error wrong results"${txtrst}
-    echo -e ""
 fi
 
-# get OS (linux / Mac OS x)
+# Get OS (Linux / Mac OS X)
 IS_DARWIN=$(uname -a | grep Darwin)
 if [ -n "$IS_DARWIN" ]; then
     CPUS=$(sysctl hw.ncpu | awk '{print $2}')
@@ -80,28 +72,35 @@ else
     DATE=date
 fi
 
+# USE_CCACHE
 export USE_CCACHE=1
 
+opt_auth=0
+opt_block=0
 opt_clean=0
 opt_dex=0
+opt_ose=0
 opt_chromium=0
 opt_jobs="$CPUS"
+opt_olvl=0
+opt_pipe=0
 opt_reset=0
 opt_sync=0
-opt_pipe=0
-opt_olvl=0
 opt_verbose=0
 
-while getopts "c:dfj:o:prsv" opt; do
+while getopts "abc:defj:o:prsv" opt; do
     case "$opt" in
+    a) opt_auth=1 ;;
+    b) opt_block=1 ;;
     c) opt_clean="$OPTARG" ;;
     d) opt_dex=1 ;;
+    e) opt_ose=1 ;;
     f) opt_chromium=1 ;;
     j) opt_jobs="$OPTARG" ;;
+    o) opt_olvl="$OPTARG" ;;
+    p) opt_pipe=1 ;;
     r) opt_reset=1 ;;
     s) opt_sync=1 ;;
-    p) opt_pipe=1 ;;
-    o) opt_olvl="$OPTARG" ;;
     v) opt_verbose=1 ;;
     *) usage
     esac
@@ -112,52 +111,102 @@ if [ "$#" -ne 1 ]; then
 fi
 device="$1"
 
-# get current version
-eval $(grep "^OSE_VERSION_" vendor/ose/config/common.mk | sed 's/ [:=]\+ /=/g' | sed 's/shell//g')
-VERSION="$OSE_VERSION_MAJOR.$OSE_VERSION_MINOR.$OSE_VERSION_MAINTENANCE"
-
-echo -e ${cya}"Building ${bldppl}OSE"${txtrst}
-
 if [ "$opt_clean" -eq 1 ]; then
     make clean >/dev/null
     echo -e ""
-    echo -e ${bldylw}"Out is clean"${txtrst}
+    echo -e ${bldylw}"Out Is Clean"${txtrst}
     echo -e ""
 elif [ "$opt_clean" -eq 2 ]; then
     make dirty >/dev/null
     echo -e ""
-    echo -e ${bldylw}"Out is dirty"${txtrst}
+    echo -e ${bldylw}"Out Is Dirty"${txtrst}
     echo -e ""
 elif [ "$opt_clean" -eq 3 ]; then
     make magicbrownies >/dev/null
     echo -e ""
-    echo -e ${bldylw}"Enjoy your magical adventure"${txtrst}
+    echo -e ${bldylw}"Enjoy Your Magical Adventure"${txtrst}
     echo -e ""
 fi
 
-# reset source tree
+# Reset source tree
 if [ "$opt_reset" -ne 0 ]; then
     echo -e ""
-    echo -e ${bldbylw}"Resetting source tree and removing all uncommitted changes"${txtrst}
+    echo -e ${bldbylw}"Resetting Source Tree And Removing All Uncommitted Changes"${txtrst}
     repo forall -c "git reset --hard HEAD; git clean -qf"
     echo -e ""
 fi
 
-# sync with latest sources
+# Sync with latest sources
 if [ "$opt_sync" -ne 0 ]; then
     echo -e ""
-    echo -e ${bldylw}"Fetching latest sources"${txtrst}
+    echo -e ${bldylw}"Fetching Latest Sources"${txtrst}
     repo sync -j"$opt_jobs"
     echo -e ""
 fi
 
+echo -e ""
+echo -e "********************************************"
+
+# Build OSE Official
+if [ "$opt_auth" -ne 0 ]; then
+    echo -e ${cya}"Building ${bldppl}Official OSE"${txtrst}
+    echo -e ""
+    export OSE_BUILD_TYPE=OFFICIAL
+else
+    echo -e ""
+    echo -e ${bldylw}"Building: ${bldred}Unofficial OSE"${txtrst}
+    echo -e ""
+fi
+
+# Build Non-Block zip
+if [ "$opt_block" -ne 0 ]; then
+    echo -e ${bldylw}"Non-Block Build"${txtrst}
+    export NO_BLOCK_OTA=true
+else
+    echo -e ${bldylw}"Block Build"${txtrst}
+fi
+
+# Display pipe
+if [ "$opt_pipe" -ne 0 ]; then
+    echo -e ${bldylw}"Using Pipe"${txtrst}
+fi
+
+# Use prebuilt chromium
+if [ "$opt_chromium" -ne 0 ]; then
+    echo -e ${bldylw}"Using Prebuilt Chromium"${txtrst}
+    export USE_PREBUILT_CHROMIUM=1
+    echo -e ""
+fi
+
+# Display dex optimizations
+if [ "$opt_dex" -ne 0 ]; then
+    echo -e ${bldgrn}"Using Dex Optimization"${txtrst}
+fi
+
+# Display OSE optimizations
+if [ "$opt_ose" -ne 0 ]; then
+    echo -e ${bldgrn}"Using OSE Optimization"${txtrst}
+fi
+
+# Display optimizations
+if [ "$opt_olvl" -eq 1 ]; then
+    echo -e ${bldgrn}"Using Os Optimization"${txtrst}
+elif [ "$opt_olvl" -eq 3 ]; then
+    echo -e ${bldgrn}"Using O3 Optimization"${txtrst}
+else
+    echo -e ${bldylw}"Using Default GCC Optimization"${txtrst}
+fi
+
+echo -e "********************************************"
+echo -e ""
+
 rm -f $OUTDIR/target/product/$device/obj/KERNEL_OBJ/.version
 
-# get time of startup
+# Get time of startup
 t1=$($DATE +%s)
 
-# setup environment
-echo -e ${bldblu}"Setting up environment"${txtrst}
+# Setup environment
+echo -e ${bldblu}"Setting Up Environment"${txtrst}
 . build/envsetup.sh
 
 # Remove system folder (this will create a new build.prop with updated build time and date)
@@ -165,45 +214,38 @@ rm -f $OUTDIR/target/product/$device/system/build.prop
 rm -f $OUTDIR/target/product/$device/system/app/*.odex
 rm -f $OUTDIR/target/product/$device/system/framework/*.odex
 
-if [ "$opt_chromium" -ne 0 ]; then
-    echo -e ""
-    echo -e ${bldylw}"Using prebuilt chromium"${txtrst}
-    export USE_PREBUILT_CHROMIUM=1
-fi
-
-# lunch device
+# Lunch device
 echo -e ""
-echo -e ${bldblu}"Lunching device"${txtrst}
+echo -e ${bldblu}"Lunching Device"${txtrst}
 lunch "ose_$device-userdebug";
 
+# Start compilation
 echo -e ""
-echo -e ${bldblu}"Starting compilation"${txtrst}
+echo -e ${bldblu}"Starting Compilation"${txtrst}
 
-# start compilation
+# Use dex optimizations
 if [ "$opt_dex" -ne 0 ]; then
     export WITH_DEXPREOPT=true
 fi
 
+# Use OSE optimizations
+if [ "$opt_ose" -ne 0 ]; then
+    export OSE_OPTIMIZE=true
+fi
+
+# Build Optimizations
+if [ "$opt_olvl" -eq 1 ]; then
+    export TARGET_USE_O_LEVEL_S=true
+elif [ "$opt_olvl" -eq 3 ]; then
+    export TARGET_USE_O_LEVEL_3=true
+fi
+
+# Use pipe
 if [ "$opt_pipe" -ne 0 ]; then
     export TARGET_USE_PIPE=true
 fi
 
-if [ "$opt_olvl" -eq 1 ]; then
-    export TARGET_USE_O_LEVEL_S=true
-    echo -e ""
-    echo -e ${bldgrn}"Using Os Optimization"${txtrst}
-    echo -e ""
-elif [ "$opt_olvl" -eq 3 ]; then
-    export TARGET_USE_O_LEVEL_3=true
-    echo -e ""
-    echo -e ${bldgrn}"Using O3 Optimization"${txtrst}
-    echo -e ""
-else
-    echo -e ""
-    echo -e ${bldgrn}"Using the default GCC Optimization Level, O2"${txtrst}
-    echo -e ""
-fi
-
+# Verbose Build
 if [ "$opt_verbose" -ne 0 ]; then
 make -j"$opt_jobs" showcommands bacon
 else
@@ -211,13 +253,5 @@ make -j"$opt_jobs" bacon
 fi
 echo -e ""
 
-# cleanup unused built
+# Cleanup unused built
 rm -f $OUTDIR/target/product/$device/ose_*-ota*.zip
-
-# finished? get elapsed time
-t2=$($DATE +%s)
-
-tmin=$(( (t2-t1)/60 ))
-tsec=$(( (t2-t1)%60 ))
-
-echo -e ${bldred}"Total time elapsed:${txtrst} ${grn}$tmin minutes $tsec seconds"${txtrst}
