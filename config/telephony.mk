@@ -10,7 +10,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     vendor/ose/prebuilt/common/etc/selective-spn-conf.xml:system/etc/selective-spn-conf.xml
 
-
 # Telephony packages
 PRODUCT_PACKAGES += \
     Mms \
