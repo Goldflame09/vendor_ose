@@ -30,6 +30,7 @@ ADDITIONAL_DEFAULT_PROPERTIES += \
 
 # OSE Tweaks
 PRODUCT_PROPERTY_OVERRIDES += \
+    ro.sys.fw.bg_apps_limit=24 \
     pm.sleep.mode=1 \
     wifi.supplicant_scan_interval=180 \
     windowsmgr.max_events_per_sec=150 \
