@@ -267,6 +267,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PROPERTY_OVERRIDES += \
     BUILD_DISPLAY_ID=$(BUILD_ID) \
     ro.ose.version=$(OSE_VERSION) \
+    ro.ose.display.version=$(OSE_VERSION) \
     ro.ose.buildtype=$(OSE_BUILD_TYPE)
 
 -include vendor/ose-priv/keys/keys.mk
