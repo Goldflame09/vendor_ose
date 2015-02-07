@@ -169,7 +169,6 @@ PRODUCT_PACKAGES += \
 # Extra tools in OSE
 PRODUCT_PACKAGES += \
     libsepol \
-    openvpn \
     e2fsck \
     mke2fs \
     tune2fs \
