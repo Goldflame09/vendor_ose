@@ -161,7 +161,7 @@ fi
 # Build Non-Block zip
 if [ "$opt_block" -ne 0 ]; then
     echo -e ${bldylw}"Non-Block Build"${txtrst}
-    export NO_BLOCK_OTA=true
+    export BLOCK_BASED_OTA=false
 else
     echo -e ${bldylw}"Block Build"${txtrst}
 fi
