@@ -16,6 +16,7 @@ usage()
     echo -e "    -d  Uses dex optimizations"
     echo -e "    -e  Uses OSE optimizations"
     echo -e "    -f  Builds with prebuilt chromium"
+    echo -e "    -g  Uses graphite optimizations"
     echo -e "    -j# Sets jobs"
     echo -e "    -o# Selects GCC O Level"
     echo -e "        Valid O Levels are"
@@ -81,6 +82,7 @@ opt_clean=0
 opt_dex=0
 opt_ose=0
 opt_chromium=0
+opt_graph=0
 opt_jobs="$CPUS"
 opt_olvl=0
 opt_pipe=0
@@ -88,7 +90,7 @@ opt_reset=0
 opt_sync=0
 opt_verbose=0
 
-while getopts "abc:defj:o:prsv" opt; do
+while getopts "abc:defgj:o:prsv" opt; do
     case "$opt" in
     a) opt_auth=1 ;;
     b) opt_block=1 ;;
@@ -96,6 +98,7 @@ while getopts "abc:defj:o:prsv" opt; do
     d) opt_dex=1 ;;
     e) opt_ose=1 ;;
     f) opt_chromium=1 ;;
+    g) opt_graph=1 ;;
     j) opt_jobs="$OPTARG" ;;
     o) opt_olvl="$OPTARG" ;;
     p) opt_pipe=1 ;;
@@ -188,7 +191,12 @@ if [ "$opt_ose" -ne 0 ]; then
     echo -e ${bldgrn}"Using OSE Optimization"${txtrst}
 fi
 
-# Display optimizations
+# Display Graphite optimizations
+if [ "$opt_graph" -ne 0 ]; then
+    echo -e ${bldgrn}"Using Graphite Optimization"${txtrst}
+fi
+
+# Display O optimizations
 if [ "$opt_olvl" -eq 1 ]; then
     echo -e ${bldgrn}"Using Os Optimization"${txtrst}
 elif [ "$opt_olvl" -eq 3 ]; then
@@ -223,6 +231,11 @@ lunch "ose_$device-userdebug";
 echo -e ""
 echo -e ${bldblu}"Starting Compilation"${txtrst}
 
+# Use pipe
+if [ "$opt_pipe" -ne 0 ]; then
+    export TARGET_USE_PIPE=true
+fi
+
 # Use dex optimizations
 if [ "$opt_dex" -ne 0 ]; then
     export WITH_DEXPREOPT=true
@@ -233,16 +246,16 @@ if [ "$opt_ose" -ne 0 ]; then
     export OSE_OPTIMIZE=true
 fi
 
-# Build Optimizations
+# Use O optimizations
 if [ "$opt_olvl" -eq 1 ]; then
     export TARGET_USE_O_LEVEL_S=true
 elif [ "$opt_olvl" -eq 3 ]; then
     export TARGET_USE_O_LEVEL_3=true
 fi
 
-# Use pipe
-if [ "$opt_pipe" -ne 0 ]; then
-    export TARGET_USE_PIPE=true
+# Use Graphite optimizations
+if [ "$opt_graph" -ne 0 ]; then
+    export GRAPHITE_OPTS=true
 fi
 
 # Verbose Build
